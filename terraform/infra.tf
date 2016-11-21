@@ -1,12 +1,22 @@
-# Add your VPC ID to default below
+#Add your VPC ID to default below and initialize variables
+
 variable "vpc_id" {
   description = "VPC ID for usage throughout the build process"
   default = "vpc-6208fa05"
 }
 
+variable "db_username" {
+  description = "Username for DB"
+  default = "username"
+}
+
+variable "db_password" {}
+
 provider "aws" {
   region = "us-west-2"
 }
+
+#Create Internet Gateway
 
 resource "aws_internet_gateway" "gw" {
   vpc_id = "${var.vpc_id}"
@@ -16,10 +26,14 @@ resource "aws_internet_gateway" "gw" {
   }
 }
 
+#Create Elastic IP
+
 resource "aws_eip" "tuto_eip" {
   vpc = true
   depends_on = ["aws_internet_gateway.gw"]
 }
+
+#Create NAT gateway
 
 resource "aws_nat_gateway" "gw" {
   allocation_id = "${aws_eip.tuto_eip.id}"
@@ -165,15 +179,123 @@ resource "aws_security_group" "nat" {
   }
 }
 
-#Create EC2 instance
+resource "aws_security_group" "web" {
+  vpc_id = "${var.vpc_id}"
 
-resource "aws_instance" "web" {
-  ami ="ami-5ec1673e"
+  ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["172.31.0.0/16"]
+  }
+
+  ingress {
+    from_port = 22
+    to_port = 22
+    protocol = "tcp"
+    cidr_blocks = ["172.31.0.0/16"]
+  }
+}
+
+resource "aws_security_group" "elb" {
+  vpc_id = "${var.vpc_id}"
+
+  ingress {
+    from_port = 80
+    to_port = 80
+    protocol = "tcp"
+    cidr_blocks = ["0.0.0.0/0"]
+  }
+}
+
+resource "aws_security_group" "db" {
+  vpc_id = "${var.vpc_id}"
+
+  ingress {
+    from_port = 3306
+    to_port = 3306
+    protocol = "tcp"
+    cidr_blocks =["172.31.0.0/16"]
+  }
+}
+
+#Create EC2 instances
+
+resource "aws_instance" "bastion" {
+  ami = "ami-5ec1673e"
   instance_type = "t2.micro"
   subnet_id  = "${aws_subnet.public_subnet_a.id}"
   vpc_security_group_ids = ["${aws_security_group.nat.id}"]
-  associate_public_ip_address = true
+  associate_public_ip_address = "true"
   key_name = "cit360"
 }
 
+resource "aws_instance" "web_b" {
+  ami = "ami-5ec1673e"
+  instance_type = "t2.micro"
+  subnet_id = "${aws_subnet.private_subnet_b.id}"
+  vpc_security_group_ids = ["${aws_security_group.web.id}"]
+  key_name = "cit360"
+}
 
+resource "aws_instance" "web_c" {
+  ami = "ami-5ec1673e"
+  instance_type = "t2.micro"
+  subnet_id = "${aws_subnet.private_subnet_c.id}"
+  vpc_security_group_ids = ["${aws_security_group.web.id}"]
+  key_name = "cit360"
+}
+
+#Create DB subnet group
+
+resource "aws_db_subnet_group" "db_subnet_group" {
+  name = "main"
+  subnet_ids = ["${aws_subnet.private_subnet_a.id}", "${aws_subnet.private_subnet_b.id}"] 
+}
+
+#Create MariaDB Instance
+
+resource "aws_db_instance" "default_db" {
+  allocated_storage = 5
+  engine = "mariadb"
+  engine_version = "10.0.24"
+  instance_class = "db.t2.micro"
+  storage_type = "gp2"
+  multi_az = "false"
+  name = "my_db"
+  username = "${var.db_username}"
+  password = "${var.db_password}"
+  db_subnet_group_name = "${aws_db_subnet_group.db_subnet_group.id}"
+  parameter_group_name = "default.mariadb10.0"
+  vpc_security_group_ids = ["${aws_security_group.db.id}"]
+}
+
+#Create a new load balancer
+
+resource "aws_elb" "elb" {
+  subnets = ["${aws_subnet.public_subnet_b.id}", "${aws_subnet.public_subnet_c.id}"]
+  
+  listener {
+    instance_port = 80
+    instance_protocol = "HTTP"
+    lb_port = 80
+    lb_protocol = "HTTP"
+  }
+
+  health_check {
+    healthy_threshold = 2
+    unhealthy_threshold = 2
+    timeout = 5
+    target = "HTTP:80/"
+    interval = 30
+  }
+
+  instances = ["${aws_instance.web_b.id}", "${aws_instance.web_c.id}"]
+  security_groups = ["${aws_security_group.elb.id}"]
+  connection_draining = true
+  connection_draining_timeout = 60
+
+  tags {
+    Name = "myelb"
+  }
+}

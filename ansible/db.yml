@@ -1,22 +1,24 @@
 ---
-- hosts: db
-  vars:
-    db_password: password
+- hosts: localhost
+  vars_files:
+    - secret.yml
   tasks:
-    - copy: src=db/MariaDB.repo dest=/etc/yum.repos.d/MariaDB.repo mode=0644
+    - name: include vars
+      include_vars: secret.yml
 
-    - become: yes
-      apt: name=MariaDB-server,MariaDB-client update_cache=yes state=present
+    - name: copy MariaDB repo to yum repo
+      become: true
+      copy: src=db/MariaDB.repo dest=/etc/yum.repos.d/MariaDB.repo mode=0644
 
-    - become: yes
-      systemd: name=mariadb state=started enabled=yes
+    - name: Download the MariaDB client 
+      become: yes
+      package: name=MariaDB-client update_cache=yes state=present
 
-    - template: src=db/mariadb_answers.txt dest=/tmp/mariadb_answers.txt mode=0644
+    - name: Unzip the database files
+      become: true
+      unarchive: src=db/db.tgz dest=~/ mode=0644
 
-    - become: yes
-      shell: /usr/bin/mysql_secure_installation </tmp/mariadb_answers.txt
-
-    - unarchive: src=db/db.tgz dest=~/ mode=0000
-
-    - command: ./make_databases.sh {{ db_password }} localhost chdir=~/db
+    - name: Rune the script to make the database
+      become: yes
+      command: ./make_databases.sh "{{ db_password }}" localhost chdir=~/db
       ignore_errors: True
