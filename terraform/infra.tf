@@ -1,4 +1,4 @@
-#Add your VPC ID to default below and initialize variables
+# -dd your VPC ID to default below and initialize variables
 
 variable "vpc_id" {
   description = "VPC ID for usage throughout the build process"
@@ -200,7 +200,7 @@ resource "aws_security_group" "web" {
     from_port = 22
     to_port = 22
     protocol = "tcp"
-    cidr_blocks = ["172.31.0.0/16"]
+    cidr_blocks = ["0.0.0.0/0"]
   }
 
   egress {
@@ -243,7 +243,7 @@ resource "aws_security_group" "db" {
 #Create EC2 instances
 
 resource "aws_instance" "bastion" {
-  ami = "ami-d2c924b2"
+  ami = "ami-5ec1673e"
   instance_type = "t2.micro"
   subnet_id  = "${aws_subnet.public_subnet_a.id}"
   vpc_security_group_ids = ["${aws_security_group.nat.id}"]
@@ -252,18 +252,20 @@ resource "aws_instance" "bastion" {
 }
 
 resource "aws_instance" "web_b" {
-  ami = "ami-d2c924b2"
+  ami = "ami-5ec1673e"
   instance_type = "t2.micro"
   subnet_id = "${aws_subnet.private_subnet_b.id}"
   vpc_security_group_ids = ["${aws_security_group.web.id}"]
+  associate_public_ip_address = "false"
   key_name = "cit360"
 }
 
 resource "aws_instance" "web_c" {
-  ami = "ami-d2c924b2"
+  ami = "ami-5ec1673e"
   instance_type = "t2.micro"
   subnet_id = "${aws_subnet.private_subnet_c.id}"
   vpc_security_group_ids = ["${aws_security_group.web.id}"]
+  associate_public_ip_address="false"
   key_name = "cit360"
 }
 
@@ -287,7 +289,6 @@ resource "aws_db_instance" "default_db" {
   username = "${var.db_username}"
   password = "${var.db_password}"
   db_subnet_group_name = "${aws_db_subnet_group.db_subnet_group.id}"
-  parameter_group_name = "default.mariadb10.0"
   vpc_security_group_ids = ["${aws_security_group.db.id}"]
 }
 
@@ -298,9 +299,9 @@ resource "aws_elb" "elb" {
   
   listener {
     instance_port = 80
-    instance_protocol = "HTTP"
+    instance_protocol = "http"
     lb_port = 80
-    lb_protocol = "HTTP"
+    lb_protocol = "http"
   }
 
   health_check {
