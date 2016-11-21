@@ -243,7 +243,7 @@ resource "aws_security_group" "db" {
 #Create EC2 instances
 
 resource "aws_instance" "bastion" {
-  ami = "ami-5ec1673e"
+  ami = "ami-d2c924b2"
   instance_type = "t2.micro"
   subnet_id  = "${aws_subnet.public_subnet_a.id}"
   vpc_security_group_ids = ["${aws_security_group.nat.id}"]
@@ -252,7 +252,7 @@ resource "aws_instance" "bastion" {
 }
 
 resource "aws_instance" "web_b" {
-  ami = "ami-5ec1673e"
+  ami = "ami-d2c924b2"
   instance_type = "t2.micro"
   subnet_id = "${aws_subnet.private_subnet_b.id}"
   vpc_security_group_ids = ["${aws_security_group.web.id}"]
@@ -260,7 +260,7 @@ resource "aws_instance" "web_b" {
 }
 
 resource "aws_instance" "web_c" {
-  ami = "ami-5ec1673e"
+  ami = "ami-d2c924b2"
   instance_type = "t2.micro"
   subnet_id = "${aws_subnet.private_subnet_c.id}"
   vpc_security_group_ids = ["${aws_security_group.web.id}"]

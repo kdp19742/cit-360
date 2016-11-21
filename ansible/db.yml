@@ -7,12 +7,12 @@
       include_vars: secret.yml
 
     - name: copy MariaDB repo to yum repo
-      become: true
+      become: yes
       copy: src=db/MariaDB.repo dest=/etc/yum.repos.d/MariaDB.repo mode=0644
 
     - name: Download the MariaDB client 
       become: yes
-      package: name=MariaDB-client update_cache=yes state=present
+      yum: name=MariaDB-client,MariaDB-server update_cache=yes state=present
 
     - name: Unzip the database files
       become: true
