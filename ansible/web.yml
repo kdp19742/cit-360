@@ -14,7 +14,7 @@
     - secret.yml
   tasks:
     - name: Include Secrets
-      include_vars: secrets.yml
+      include_vars: secret.yml
 
     - name: Change SELinux to permissive
       become: yes
