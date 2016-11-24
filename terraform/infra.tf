@@ -7,7 +7,7 @@ variable "vpc_id" {
 
 variable "db_username" {
   description = "Username for DB"
-  default = "username"
+  default = "root"
 }
 
 variable "db_password" {}

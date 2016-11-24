@@ -84,11 +84,11 @@
 
     - name: Make directory
       become: yes
-      command: chmod -R 0777 storage chdir="{{ service_dir }}"
+      file: path={{ service_dir }}/storage mode=0777 recurse=yes
 
     - name: Change the owner of the nginx directory
       become: yes
-      command: chown -R 0777 nginx:nginx . chdir="{{ service_dir }}"
+      file: path={{ service_dir }} owner=nginx group=nginx recurse=yes
 
     - name: set up web environment
       become: yes

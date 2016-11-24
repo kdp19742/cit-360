@@ -1,5 +1,5 @@
 ---
-- hosts: localhost
+- hosts: db
   vars_files:
     - secret.yml
   tasks:
@@ -12,13 +12,13 @@
 
     - name: Download the MariaDB client 
       become: yes
-      yum: name=MariaDB-client,MariaDB-server update_cache=yes state=present
+      package: name=MariaDB-client update_cache=yes state=present
 
     - name: Unzip the database files
       become: true
       unarchive: src=db/db.tgz dest=~/ mode=0644
 
-    - name: Rune the script to make the database
+    - name: Run the script to make the database
       become: yes
-      command: ./make_databases.sh "{{ db_password }}" localhost chdir=~/db
+      command: ./make_databases.sh {{ db_password }} tf-20161123232403707461996l46.cwssjdtggppd.us-west-2.rds.amazonaws.com  chdir=~/db
       ignore_errors: True
