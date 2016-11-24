@@ -16,9 +16,9 @@
 
     - name: Unzip the database files
       become: true
-      unarchive: src=db/db.tgz dest=~/ mode=0644
+      unarchive: src=db/db.tgz dest=~/ mode=0777
 
     - name: Run the script to make the database
       become: yes
-      command: ./make_databases.sh {{ db_password }} tf-20161123232403707461996l46.cwssjdtggppd.us-west-2.rds.amazonaws.com  chdir=~/db
+      command: ./make_databases.sh {{ db_password }} tf-201611240157431477804885jd.cwssjdtggppd.us-west-2.rds.amazonaws.com chdir=~/db
       ignore_errors: True

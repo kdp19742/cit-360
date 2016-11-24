@@ -5,7 +5,7 @@
     service_name: curriculum
     service_version: 1.0
     app_env: test
-    db_host: localhost
+    db_host: tf-201611240157431477804885jd.cwssjdtggppd.us-west-2.rds.amazonaws.com
     db_database: curriculum
     db_username: curriculum
     db_port: 3306
@@ -20,13 +20,21 @@
       become: yes
       lineinfile: dest=/etc/sysconfig/selinux regexp="^SELINUX=" line="SELINUX=permissive"
 
+    - name: 1
+      become: yes
+      command: setenforce 0
+
     - name: Install epel
       become: yes
       package: name=epel-release update_cache=yes state=present
 
-    - name: Install nginx, php
+    - name: Install php and dependencies
       become: yes
-      package: name=nginx,php,php-fpm,php-ldap,php-mbstring,php-mcrypt,php-mysql,php-phpunit-PHPUnit update_cache=yes state=present
+      shell: yes | yum install php php-gd php-mysql php-mcrypt php-fpm php-ldap php-mbstring php-phpunit-PHPUnit
+
+    - name: Install nginx
+      become: yes
+      yum: name=nginx update_cache=yes state=present
       register: nginx_install
 
     - name: Download composer
@@ -42,22 +50,22 @@
 
     - name: Copy nginx to nginx dir
       become: yes
-      copy: src=web/nginx.conf dest=/etc/nginx/nginx.conf mode=0644
+      copy: src=web/nginx.conf dest=/etc/nginx/nginx.conf mode=0777
       register: nginx_conf
 
     - name: Configure vhost.conf
       become: yes
-      template: src=web/vhost.conf.j2 dest=/etc/nginx/conf.d/{{ service_name }}.conf mode=0644
+      template: src=web/vhost.conf.j2 dest=/etc/nginx/conf.d/{{ service_name }}.conf mode=0777
       register: vhost_conf
 
     - name: Configure php
       become: yes
-      template: src=web/php.ini.j2 dest=/etc/php.ini mode=0644
+      template: src=web/php.ini.j2 dest=/etc/php.ini mode=0777
       register: php_conf
 
     - name: copy php-fpm-web conf 
       become: yes
-      copy: src=web/php-fpm-web.conf dest=/etc/php-fpm.d/www.conf mode=0644
+      copy: src=web/php-fpm-web.conf dest=/etc/php-fpm.d/www.conf mode=0777
       register: php_fpm_conf
 
     - name: Restart nginx if changes are made
