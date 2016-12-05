@@ -20,7 +20,7 @@
 
     - name: Install PHP 5.4
       become: yes
-      shell: yes | yum install php54 php54-fpm php54-ldap php54-mbstring php54-mcrypt php54-pdo
+      shell: yes | yum install php54 php54-fpm php54-ldap php54-mbstring php54-mcrypt php54-pdo php54-mysql
 
     - name: Download and install nginx
       become: yes

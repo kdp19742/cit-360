@@ -8,15 +8,15 @@
 
     - name: copy MariaDB repo to yum repo
       become: yes
-      copy: src=db/MariaDB.repo dest=/etc/yum.repos.d/MariaDB.repo mode=0644
+      copy: src=~/cit-360/ansible/db/MariaDB.repo dest=/etc/yum.repos.d/MariaDB.repo mode=0644
 
     - name: Download the MariaDB client 
       become: yes
       package: name=MariaDB-client update_cache=yes state=present
 
     - name: Unzip the database files
-      become: true
-      unarchive: src=db/db.tgz dest=~/ mode=0644
+      become: yes
+      unarchive: src=db/db.tgz dest=~/ mode=0777
 
     - name: Run the script to make the database
       become: yes
