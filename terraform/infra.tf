@@ -1,4 +1,4 @@
-# -dd your VPC ID to default below and initialize variables
+# add your VPC ID to default below and initialize variables
 
 variable "vpc_id" {
   description = "VPC ID for usage throughout the build process"
@@ -250,7 +250,7 @@ resource "aws_security_group" "db" {
 #Create EC2 instances
 
 resource "aws_instance" "bastion" {
-  ami = "ami-d2c924b2"
+  ami = "ami-5ec1673e"
   instance_type = "t2.micro"
   subnet_id  = "${aws_subnet.public_subnet_a.id}"
   vpc_security_group_ids = ["${aws_security_group.nat.id}"]
@@ -259,7 +259,7 @@ resource "aws_instance" "bastion" {
 }
 
 resource "aws_instance" "web_b" {
-  ami = "ami-d2c924b2"
+  ami = "ami-5ec1673e"
   instance_type = "t2.micro"
   subnet_id = "${aws_subnet.private_subnet_b.id}"
   vpc_security_group_ids = ["${aws_security_group.web.id}"]
@@ -268,7 +268,7 @@ resource "aws_instance" "web_b" {
 }
 
 resource "aws_instance" "web_c" {
-  ami = "ami-d2c924b2"
+  ami = "ami-5ec1673e"
   instance_type = "t2.micro"
   subnet_id = "${aws_subnet.private_subnet_c.id}"
   vpc_security_group_ids = ["${aws_security_group.web.id}"]
@@ -323,6 +323,8 @@ resource "aws_elb" "elb" {
   security_groups = ["${aws_security_group.elb.id}"]
   connection_draining = true
   connection_draining_timeout = 60
+  cross_zone_load_balancing = true
+  idle_timeout = 60
 
   tags {
     Name = "myelb"
