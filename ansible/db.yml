@@ -3,10 +3,10 @@
   vars_files:
     - secret.yml
   tasks:
-    - name: include vars
+    - name: Include vars
       include_vars: secret.yml
 
-    - name: copy MariaDB repo to yum repo
+    - name: Copy MariaDB repo to yum repo
       become: yes
       copy: src=~/cit-360/ansible/db/MariaDB.repo dest=/etc/yum.repos.d/MariaDB.repo mode=0644
 
@@ -20,5 +20,5 @@
 
     - name: Run the script to make the database
       become: yes
-      command: ./make_databases.sh {{ db_password }} tf-201612030151143063358634pu.cwssjdtggppd.us-west-2.rds.amazonaws.com chdir=~/db
+      command: ./make_databases.sh {{ db_password }} tf-20161210231140406393872cy6.cwssjdtggppd.us-west-2.rds.amazonaws.com chdir=~/db
       ignore_errors: True
