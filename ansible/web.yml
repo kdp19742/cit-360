@@ -5,7 +5,7 @@
     service_name: curriculum
     service_version: 1.0
     app_env: test
-    db_host: tf-20161211002725150228154lxq.cwssjdtggppd.us-west-2.rds.amazonaws.com 
+    db_host: tf-20161211014009278710662kf7.cwssjdtggppd.us-west-2.rds.amazonaws.com 
     db_database: curriculum
     db_username: curriculum
     db_port: 3306
@@ -20,7 +20,7 @@
 
     - name: Install PHP 5.4
       become: yes
-      shell: yes | yum install php54 php54-fpm php54-ldap php54-mbstring php54-mcrypt php54-pdo php54-php-mysqlnd php54-phpunit-PHPUnit
+      shell: yes | yum install php54 php54-fpm php54-ldap php54-mbstring php54-mcrypt php54-pdo php54-mysqlnd
 
     - name: Download and install nginx
       become: yes
